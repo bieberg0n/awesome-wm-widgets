@@ -22,6 +22,7 @@ if SYS_LANG == "C" or SYS_LANG == "C." then
     -- C-locale is a common fallback for simple English
     SYS_LANG = "en"
 end
+SYS_LANG = "en"
 -- default language is ENglish
 local LANG = gears.filesystem.file_readable(WIDGET_DIR .. "/" .. "locale/" ..
                                       SYS_LANG .. ".lua") and SYS_LANG or "en"

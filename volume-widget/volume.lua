@@ -14,6 +14,7 @@ local gears = require("gears")
 local beautiful = require("beautiful")
 local watch = require("awful.widget.watch")
 local utils = require("awesome-wm-widgets.volume-widget.utils")
+local naughty = require("naughty")
 
 local LIST_DEVICES_CMD = [[sh -c "pacmd list-sinks; pacmd list-sources"]]
 local function GET_VOLUME_CMD(card, device, mixctrl, value_type)
@@ -244,14 +245,23 @@ local function worker(user_args)
 		widget:set_volume_level(volume_level)
 	end
 
+	local function notify_volume()
+		awful.spawn.easy_async_with_shell("pactl get-sink-volume @DEFAULT_SINK@ | grep -Po '\\d+(?=%)' | head -n 1", function(stdout)
+			local volume = stdout:gsub("\n", "")
+			naughty.notify({ title = "音量", text = volume .. "%", timeout = 1, replaces_id = 1 })
+		end)
+	end
+
 	function volume:inc(s)
 		spawn.easy_async(INC_VOLUME_CMD(card, device, mixctrl, value_type, s or step), function(stdout)
+			notify_volume()
 			update_graphic(volume.widget, stdout)
 		end)
 	end
 
 	function volume:dec(s)
 		spawn.easy_async(DEC_VOLUME_CMD(card, device, mixctrl, value_type, s or step), function(stdout)
+			notify_volume()
 			update_graphic(volume.widget, stdout)
 		end)
 	end
